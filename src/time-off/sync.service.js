@@ -1,34 +1,27 @@
-import { Injectable, Logger, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException, Inject, forwardRef, Dependencies } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { TimeOffService } from './time-off.service.js';
-import { UpsertBalanceDto } from './dto/upsert-balance.dto.js';
 
 /**
  * SyncService
- *
- * Handles communication between the local system and the HCM Source of Truth.
- * Implements Real-time sync, Batch sync, and Independent Change logic.
  */
 @Injectable()
+@Dependencies(HttpService, forwardRef(() => TimeOffService))
 export class SyncService {
   private readonly logger = new Logger(SyncService.name);
-  private readonly hcmBaseUrl = 'http://localhost:3000/mock-hcm'; // Self-referencing mock for this exercise
+  private readonly hcmBaseUrl = 'http://localhost:3000/mock-hcm';
 
   constructor(
-    private readonly httpService: HttpService,
-    
+    httpService,
     @Inject(forwardRef(() => TimeOffService))
-    private readonly timeOffService: TimeOffService,
-  ) {}
+    timeOffService,
+  ) {
+    this.httpService = httpService;
+    this.timeOffService = timeOffService;
+  }
 
-
-  /**
-   * Real-time Sync: Fetches latest balance from HCM and updates local DB.
-   * Logic for 'Independent Changes': If HCM (Source of Truth) differs,
-   * local balance is updated to match.
-   */
-  async syncBalanceWithHcm(employeeId: string, locationId: string): Promise<number> {
+  async syncBalanceWithHcm(employeeId, locationId) {
     try {
       this.logger.log(`Syncing balance for employee=${employeeId} location=${locationId} with HCM...`);
       
@@ -38,7 +31,6 @@ export class SyncService {
 
       const hcmBalance = response.data.balance;
       
-      // Update local record to match HCM (Source of Truth)
       await this.timeOffService.upsertBalance({
         employeeId,
         locationId,
@@ -53,10 +45,7 @@ export class SyncService {
     }
   }
 
-  /**
-   * Notifies HCM of a deduction. Used when a request is approved locally.
-   */
-  async notifyHcmOfDeduction(employeeId: string, locationId: string, amount: number): Promise<boolean> {
+  async notifyHcmOfDeduction(employeeId, locationId, amount) {
     try {
       this.logger.log(`Notifying HCM of deduction: ${amount} days for ${employeeId}`);
       
@@ -81,11 +70,7 @@ export class SyncService {
     }
   }
 
-  /**
-   * Batch Sync: Processes a large corpus of balance data from HCM.
-   * Overwrites local records with HCM data.
-   */
-  async processBatchSync(balances: UpsertBalanceDto[]): Promise<any> {
+  async processBatchSync(balances) {
     this.logger.log(`Starting batch sync for ${balances.length} records...`);
     const summary = await this.timeOffService.batchUpsertBalances(balances);
     this.logger.log(`Batch sync finished. Succeeded: ${summary.succeeded}, Failed: ${summary.failed}`);

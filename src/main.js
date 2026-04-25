@@ -20,4 +20,3 @@ async function bootstrap() {
   console.log(`🚀 Time-Off Service running on http://localhost:${port}`);
 }
 bootstrap();
-

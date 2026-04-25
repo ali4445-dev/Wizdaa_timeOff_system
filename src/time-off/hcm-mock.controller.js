@@ -1,27 +1,23 @@
-import { Controller, Get, Post, Body, Param, Query, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Logger, Bind } from '@nestjs/common';
 
 /**
  * MockHcmController
- *
- * Simulates an external Human Capital Management (HCM) system.
- * In a real scenario, this would be Workday, SAP, etc.
  */
 @Controller('mock-hcm')
 export class MockHcmController {
   private readonly logger = new Logger(MockHcmController.name);
 
-  // Simple in-memory storage for mock HCM balances
-  private balances: Record<string, number> = {
-    'emp123:locA': 20,
-    'emp456:locB': 10,
-    'emp789:locA': 5,
-  };
+  constructor() {
+    this.balances = {
+      'emp123:locA': 20,
+      'emp456:locB': 10,
+      'emp789:locA': 5,
+    };
+  }
 
   @Get('balance/:employeeId/:locationId')
-  async getBalance(
-    @Param('employeeId') employeeId: string,
-    @Param('locationId') locationId: string,
-  ) {
+  @Bind(Param('employeeId'), Param('locationId'))
+  async getBalance(employeeId, locationId) {
     const key = `${employeeId}:${locationId}`;
     const balance = this.balances[key] ?? 0;
     
@@ -36,9 +32,8 @@ export class MockHcmController {
   }
 
   @Post('deduct')
-  async deductBalance(
-    @Body() body: { employeeId: string; locationId: string; amount: number },
-  ) {
+  @Bind(Body())
+  async deductBalance(body) {
     const key = `${body.employeeId}:${body.locationId}`;
     const current = this.balances[key] ?? 0;
 
@@ -57,13 +52,9 @@ export class MockHcmController {
     };
   }
 
-  /**
-   * Endpoint to simulate independent HCM changes (e.g. Work Anniversary)
-   */
   @Post('simulate-bonus')
-  async simulateBonus(
-    @Body() body: { employeeId: string; locationId: string; amount: number },
-  ) {
+  @Bind(Body())
+  async simulateBonus(body) {
     const key = `${body.employeeId}:${body.locationId}`;
     this.balances[key] = (this.balances[key] ?? 0) + body.amount;
     this.logger.log(`HCM: Bonus added to ${key}! +${body.amount}. New balance: ${this.balances[key]}`);

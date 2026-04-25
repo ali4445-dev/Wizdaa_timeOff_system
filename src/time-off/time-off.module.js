@@ -10,19 +10,6 @@ import { HttpModule } from '@nestjs/axios';
 
 /**
  * TimeOffModule
- *
- * Encapsulates all time-off related functionality:
- *   - Balance management (CRUD + batch sync)
- *   - Time-off request lifecycle (create, approve, reject, cancel)
- *   - Defensive validation logic
- *
- * Architecture:
- *   Controller → Service → Repository (TypeORM) → SQLite
- *
- * Future extensions (Parts 2-4):
- *   - HcmClientService (external HCM API integration)
- *   - SyncService (batch reconciliation)
- *   - EventEmitter integration for async notifications
  */
 @Module({
   imports: [

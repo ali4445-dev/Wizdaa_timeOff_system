@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { jest } from '@jest/globals';
+import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { of, throwError } from 'rxjs';
 import { SyncService } from './sync.service.js';
@@ -6,9 +7,9 @@ import { TimeOffService } from './time-off.service.js';
 import { InternalServerErrorException } from '@nestjs/common';
 
 describe('SyncService (HCM Integration & Independent Changes)', () => {
-  let service: SyncService;
-  let httpService: HttpService;
-  let timeOffService: TimeOffService;
+  let service;
+  let httpService;
+  let timeOffService;
 
   const mockHttpService = {
     get: jest.fn(),
@@ -21,7 +22,7 @@ describe('SyncService (HCM Integration & Independent Changes)', () => {
   };
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         SyncService,
         { provide: HttpService, useValue: mockHttpService },
@@ -29,25 +30,21 @@ describe('SyncService (HCM Integration & Independent Changes)', () => {
       ],
     }).compile();
 
-    service = module.get<SyncService>(SyncService);
-    httpService = module.get<HttpService>(HttpService);
-    timeOffService = module.get<TimeOffService>(TimeOffService);
+    service = module.get(SyncService);
+    httpService = module.get(HttpService);
+    timeOffService = module.get(TimeOffService);
 
     jest.clearAllMocks();
   });
 
-  // ─── 1. MOCK HCM UPDATES & ERRORS ────────────────────────────────────
-
   describe('syncBalanceWithHcm', () => {
     it('should update local balance matching HCM Source of Truth (Anniversary Case)', async () => {
-      // Mock HCM returning 25 days (maybe it was 20 locally before)
       mockHttpService.get.mockReturnValue(of({
         data: { balance: 25 }
       }));
 
       await service.syncBalanceWithHcm('emp1', 'locA');
 
-      // VERIFY: local balance updated to 25
       expect(timeOffService.upsertBalance).toHaveBeenCalledWith({
         employeeId: 'emp1',
         locationId: 'locA',
@@ -83,8 +80,6 @@ describe('SyncService (HCM Integration & Independent Changes)', () => {
       expect(result).toBe(false);
     });
   });
-
-  // ─── 4. BATCH UPDATE REGRESSION ──────────────────────────────────────
 
   describe('processBatchSync', () => {
     it('should process entire corpus and return summary', async () => {
