@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+dist/
+
+# Env
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Database
+data/*.sqlite
+data/*.sqlite-journal
+
+# Testing
+coverage/
+
+# Misc
+.DS_Store
+.vscode/
+.idea/
+.gemini/
