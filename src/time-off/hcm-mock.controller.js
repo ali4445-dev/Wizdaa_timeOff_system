@@ -5,7 +5,7 @@ import { Controller, Get, Post, Body, Param, Query, Logger, Bind } from '@nestjs
  */
 @Controller('mock-hcm')
 export class MockHcmController {
-  private readonly logger = new Logger(MockHcmController.name);
+  logger = new Logger(MockHcmController.name);
 
   constructor() {
     this.balances = {

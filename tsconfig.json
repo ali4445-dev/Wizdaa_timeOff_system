@@ -13,9 +13,10 @@
     "allowJs": true,
     "checkJs": false,
     "target": "ES2023",
+    "lib": ["ES2023", "DOM"],
     "sourceMap": true,
+    "rootDir": "./",
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -23,5 +24,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "eslint.config.mjs"]
 }

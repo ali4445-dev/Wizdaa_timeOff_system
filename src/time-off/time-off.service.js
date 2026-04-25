@@ -24,7 +24,7 @@ import { SyncService } from './sync.service.js';
   forwardRef(() => SyncService),
 )
 export class TimeOffService {
-  private readonly logger = new Logger(TimeOffService.name);
+  logger = new Logger(TimeOffService.name);
 
   constructor(
     @InjectRepository(Balance)

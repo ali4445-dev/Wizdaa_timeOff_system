@@ -9,8 +9,8 @@ import { TimeOffService } from './time-off.service.js';
 @Injectable()
 @Dependencies(HttpService, forwardRef(() => TimeOffService))
 export class SyncService {
-  private readonly logger = new Logger(SyncService.name);
-  private readonly hcmBaseUrl = 'http://localhost:3000/mock-hcm';
+  logger = new Logger(SyncService.name);
+  hcmBaseUrl = 'http://localhost:3000/mock-hcm';
 
   constructor(
     httpService,
